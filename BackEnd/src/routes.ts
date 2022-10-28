@@ -13,7 +13,8 @@ import { AddItemController } from './Controllers/Order/AddItemController';
 import { RemoveItemController } from './Controllers/Order/RemoveItemController';
 import { SendOrderController } from './Controllers/Order/SendOrderController';
 import { ListOrdersController } from './Controllers/Order/ListOrdersController';
-import { DetailOrderController } from './Controllers/Order/DetailOrderController'
+import { DetailOrderController } from './Controllers/Order/DetailOrderController';
+import { FinishOrderController } from './Controllers/Order/FinishOrderController';
 
 import multer from 'multer'
 import uploadConfig from './config/multer'
@@ -41,8 +42,9 @@ router.post('/order', isAuthenticaded, new CreateOrderController().handle);
 router.delete('/order', isAuthenticaded, new RemoveOrderController().handle);
 router.post('/order/add', isAuthenticaded, new AddItemController().handle);
 router.delete('/order/remove', isAuthenticaded, new RemoveItemController().handle);
-router.put('/order/send', isAuthenticaded, new SendOrderController().handle)
-router.get('/orders', isAuthenticaded, new ListOrdersController().handle)
-router.get('/order/detail', isAuthenticaded, new DetailOrderController().handle)
+router.put('/order/send', isAuthenticaded, new SendOrderController().handle);
+router.get('/orders', isAuthenticaded, new ListOrdersController().handle);
+router.get('/order/detail', isAuthenticaded, new DetailOrderController().handle);
+router.put('/order/finish', isAuthenticaded, new FinishOrderController().handle);
 
 export { router };
