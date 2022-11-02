@@ -1,0 +1,48 @@
+*{
+  margin: 0;
+  padding: 0;
+  outline: 0;
+  box-sizing: border-box;
+}
+
+:root{
+
+  --white: #fff;
+  --black: #000;
+
+  --dark900: #101026;
+  --dark700: #1D1D2E;
+
+  --gray100: #8a8a8a;
+  --green900: #3fffa3;
+  --red900: #ff3f4b;
+}
+
+button{
+  cursor: pointer;
+}
+
+a{
+  color: indianred;
+  text-decoration: none;
+}
+
+body{
+  background-color: var(--dark700);
+}
+
+body, input, textarea, select, button{
+  font: 400 1rem sans-serif;
+}
+
+@media (max-width: 720px){
+  html{
+    font-size: 87.5%;
+  }
+}
+
+@media (max-width: 1000px) {
+  html {
+    font-size: 93.75%;
+  }
+}
