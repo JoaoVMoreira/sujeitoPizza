@@ -7,6 +7,8 @@ import styles from '../../styles/home.module.scss'
 import { Button } from '../components/ui/button'
 import Link from "next/link"
 import { AuthContext } from '../contexts/AuthContext'
+import { GetServerSideProps } from 'next'
+import { canSSRGuest } from '../utils/canSSRGuest'
 
 export default function Home() {
 
@@ -55,3 +57,10 @@ export default function Home() {
     </>
   )
 }
+
+export const getServerSideProps =  canSSRGuest(async (ctx) => {
+
+  return {
+    props: {}
+  }
+})

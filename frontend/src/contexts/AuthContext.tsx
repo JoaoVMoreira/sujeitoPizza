@@ -1,4 +1,4 @@
-import { createContext, ReactNode, useState } from 'react';
+import { createContext, ReactNode, useEffect, useState } from 'react';
 import {destroyCookie, setCookie, parseCookies} from 'nookies';
 import Router from 'next/router';
 import { api } from '../Services/apiClient'
@@ -8,6 +8,7 @@ type AuthContextData = { //Criando tipagem
     isAuthenticated: boolean; //Verificação se o usuário está authenticado
     signIn: (credenciais: SignInProps) => Promise<void>; //SignIn recebe uma função que recebe as credenciasi definidas (email e password) 
     signOut: () => void;
+    signUp: (credenciais: SignUpProps) => Promise<void>
 }
 
 type UserProps = { //Dados de usuário' recebidos
@@ -25,6 +26,12 @@ type AuthProviderProps = { //Setando o tipo do Children
     children: ReactNode;
 }
 
+type SignUpProps = {
+    name: string,
+    email: string,
+    password: string
+}
+
 
 export const AuthContext = createContext({} as AuthContextData)//Setando tipagem no contexto
 
@@ -38,6 +45,24 @@ export function signOut(){
 }
 
 export function AuthProvider({ children }: AuthProviderProps){ //Quem irá prover as informações 
+
+    useEffect(()=>{
+        const { '@nextauth.token': token } = parseCookies();
+
+        if(token){
+            api.get('/me').then(response => {
+                const { id, name, email } = response.data;
+
+                setUser({
+                    id,
+                    name,
+                    email
+                })
+            }).catch(()=>{
+                signOut()
+            })
+        }
+    }, [])
 
     const [user, setUser] = useState<UserProps>() //Informando os dados da UseProps na useState do user
     const isAuthenticated = !!user; //Se user estiver vazio então isAuthenticated recebe false
@@ -71,8 +96,16 @@ export function AuthProvider({ children }: AuthProviderProps){ //Quem irá prove
         }
     }
 
+    async function signUp({ name, email, password }: SignUpProps){
+        try{    
+            const response = await api.post('/users', {name, email, password})
+        }catch(error){
+            console.log(error)
+        }
+    }   
+
     return(
-    <AuthContext.Provider value={{ user,  isAuthenticated, signIn, signOut }}>
+    <AuthContext.Provider value={{ user, isAuthenticated, signIn, signOut, signUp }}>
         {children}
     </AuthContext.Provider>
     )

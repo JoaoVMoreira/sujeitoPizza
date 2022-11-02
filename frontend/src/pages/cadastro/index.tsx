@@ -1,11 +1,12 @@
 import Head from "next/head"
 import Image from "next/image"
-import { FormEvent, useState } from "react"
+import { FormEvent, useContext, useState } from "react"
 import { Input } from "../../components/ui/input"
 import logoImg from '../../../public/logo.svg'
 import styles from '../../../styles/home.module.scss'
 import { Button } from '../../components/ui/button'
 import Link from "next/link"
+import { AuthContext } from "../../contexts/AuthContext"
 
 export default function Cadastro() {
 
@@ -13,6 +14,8 @@ export default function Cadastro() {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [loading, setLoading] = useState(false)
+
+    const { signUp } = useContext(AuthContext)
 
     async function handleSignUp(event: FormEvent){
         event.preventDefault();
@@ -23,6 +26,16 @@ export default function Cadastro() {
         }
 
         setLoading(true)
+
+        let data = {
+            name,
+            email,
+            password
+        }
+
+        await signUp(data);
+
+        setLoading(false);
 
     }
     return (
