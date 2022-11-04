@@ -1,14 +1,32 @@
 import Head from "next/head"
-import { ChangeEvent, useState } from "react"
+import { ChangeEvent, FormEvent, useState } from "react"
 import { FiUpload } from "react-icons/fi"
 import { Header } from "../../components/Header"
+import { setupAPIClient } from "../../Services/setupAPIClient"
 import { canSSRAuth } from "../../utils/canSSRAuth"
 import styles from './styles.module.scss'
 
-export default function Products(){
+type ItemProps = {
+    id: string,
+    name: string,
+}
+
+interface CategoryProps{
+    categoryList: ItemProps[];
+}
+
+export default function Products({ categoryList }: CategoryProps){
+
 
     const [avatarUrl, setAvatarUrl] = useState('');
     const [imageAvatar, setImageAvatar] = useState(null);
+
+    const [categories, setCategories] = useState(categoryList || [])
+    const [categorySelected, setCategorySelected] = useState(0)
+
+    const [name, setName] = useState('')
+    const [price, setPrice] = useState('')
+    const [description, setDescription] = useState('')
 
     function handleFile(e: ChangeEvent<HTMLInputElement>){
 
@@ -29,6 +47,43 @@ export default function Products(){
         }
     }
 
+    function handleCategorySelected(e){
+        setCategorySelected(e.target.value)
+    }
+
+    async function handleRegister(event: FormEvent){
+        event.preventDefault();
+
+        try{
+            const data = new FormData()
+            if(name === '' || price === '' || description === '' || imageAvatar === ''){
+                alert('Preencha todos os campos')
+                return;
+            }else{
+
+                data.append('name', name);
+                data.append('price', price);
+                data.append('description', description);
+                data.append('category_id', categories[categorySelected].id);
+                data.append('file', imageAvatar);
+
+                const apiClient = setupAPIClient();
+                await apiClient.post('/product', data);
+
+                alert('Produto cadastrado com sucesso')
+
+                setName('')
+                setPrice('')
+                setDescription('')
+                setAvatarUrl(null)
+            }
+        }catch(error){
+            alert(error)
+        }
+
+        
+    }
+
     return(
         <>
             <Head>Produtos - Sujeito Pizza</Head>
@@ -38,7 +93,7 @@ export default function Products(){
                 <main className={styles.conteiner}>
                     <h1>Novo Produto</h1>
 
-                    <form className={styles.form}>
+                    <form className={styles.form} onSubmit={handleRegister}>
 
                         <label className={styles.labelAvatar}>
                             <span>
@@ -49,15 +104,21 @@ export default function Products(){
                             {avatarUrl && (
                                 <img className={styles.imagePreview} src={avatarUrl} alt="Foto do pedido" width={250} height={250} />
                             )}
-                        </label>
+                        </label> 
 
-                        <select>
-                            <option>Bebida</option>
+                        <select value={categorySelected} onChange={handleCategorySelected} >
+                            {categories.map((item, index)=>{
+                                return(
+                                    <option key={item.id} value={index}>
+                                        {item.name}
+                                    </option>
+                                )
+                            })}
                         </select>
 
-                        <input type="text" placeholder="Insira o nome do produto" className={styles.input}/>
-                        <input type="text" placeholder="Insira o preço do produto" className={styles.input} />
-                        <textarea placeholder="Descreva o produto" className={styles.input} />
+                        <input type="text" placeholder="Insira o nome do produto" className={styles.input} value={name} onChange={(e)=>setName(e.target.value)} />
+                        <input type="text" placeholder="Insira o preço do produto" className={styles.input} value={price} onChange={(e) => setPrice(e.target.value)} />
+                        <textarea placeholder="Descreva o produto" className={styles.input} value={description} onChange={(e) => setDescription(e.target.value)} />
                         <button className={styles.buttonAdd} type='submit'>Cadastrar</button>
                     </form>
                 </main>
@@ -67,8 +128,15 @@ export default function Products(){
     )
 }
 
-export const getServiceSideProps = canSSRAuth(async (ctx)=>{
-    return{
-        props: {}
+export const getServerSideProps = canSSRAuth(async (ctx) => {
+    const apiClient = setupAPIClient(ctx)
+    
+    const response = await apiClient.get('/category')
+
+
+    return {
+        props: {
+            categoryList: response.data
+        }
     }
 })
